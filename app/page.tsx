@@ -42,12 +42,15 @@ export default async function HomePage() {
       <NavBar />
 
       <div className="px-4 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-xl font-bold">Select a friend to request them to pay for you</h1>
+        <div className="flex items-start justify-between mb-6 gap-3">
+          <div>
+            <h1 className="text-xl font-bold">Select a friend</h1>
+            <p className="text-sm text-gray-500">Request them to pay for you</p>
+          </div>
           {hasFriends && (
             <Link
               href="/friends"
-              className="text-sm font-medium text-brand-700 border border-brand-600 rounded-full px-3 py-1"
+              className="flex-shrink-0 whitespace-nowrap text-sm font-medium text-brand-700 border border-brand-600 rounded-full px-3 py-1"
             >
               + Add friend
             </Link>

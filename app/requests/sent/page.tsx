@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
+import { markSectionSeen } from "@/lib/notifications";
 import NavBar from "@/components/NavBar";
+import BackButton from "@/components/BackButton";
 
 type Profile = {
   id: string;
@@ -19,7 +21,7 @@ type PaymentRequest = {
   upi_id: string | null;
   payee_name: string | null;
   amount: number;
-  status: "pending" | "paid" | "cancelled";
+  status: "pending" | "paid" | "cancelled" | "declined";
   proof_screenshot_url: string | null;
   created_at: string;
   payer?: Profile;
@@ -54,6 +56,7 @@ export default function SentRequestsPage() {
 
     setRequests(list.map((r) => ({ ...r, payer: profileMap.get(r.payer_id) })));
     setLoading(false);
+    markSectionSeen("sent");
   }, [supabase]);
 
   useEffect(() => {
@@ -75,6 +78,7 @@ export default function SentRequestsPage() {
     <div>
       <NavBar />
       <div className="px-4 py-6 space-y-4">
+        <BackButton />
         <h1 className="text-xl font-bold mb-2">Your requests</h1>
 
         {loading ? (
@@ -122,6 +126,12 @@ export default function SentRequestsPage() {
                     </div>
                   )}
                 </div>
+              )}
+
+              {req.status === "declined" && (
+                <p className="inline-block text-sm font-semibold text-red-700 bg-red-100 rounded-full px-3 py-1">
+                  ❌ {req.payer?.display_name ?? "They"} declined this request
+                </p>
               )}
             </div>
           ))

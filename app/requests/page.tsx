@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { buildUpiPayLink } from "@/lib/upi";
+import { markSectionSeen } from "@/lib/notifications";
 import NavBar from "@/components/NavBar";
+import BackButton from "@/components/BackButton";
 
 type Profile = {
   id: string;
@@ -19,7 +21,7 @@ type PaymentRequest = {
   upi_id: string | null;
   payee_name: string | null;
   amount: number;
-  status: "pending" | "paid" | "cancelled";
+  status: "pending" | "paid" | "cancelled" | "declined";
   proof_screenshot_url: string | null;
   created_at: string;
   requester?: Profile;
@@ -31,6 +33,7 @@ export default function IncomingRequestsPage() {
   const [requests, setRequests] = useState<PaymentRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploadingFor, setUploadingFor] = useState<string | null>(null);
+  const [decliningId, setDecliningId] = useState<string | null>(null);
   const fileInputsRef = useRef<Record<string, HTMLInputElement | null>>({});
 
   const load = useCallback(async () => {
@@ -60,6 +63,7 @@ export default function IncomingRequestsPage() {
       list.map((r) => ({ ...r, requester: profileMap.get(r.requester_id) }))
     );
     setLoading(false);
+    markSectionSeen("requests");
   }, [supabase]);
 
   useEffect(() => {
@@ -85,6 +89,24 @@ export default function IncomingRequestsPage() {
       amount: Number(req.amount),
     });
     window.location.href = link;
+  }
+
+  async function handleDecline(req: PaymentRequest) {
+    const confirmed = window.confirm(
+      "Are you sure you want to decline this request? The person will be notified."
+    );
+    if (!confirmed) return;
+
+    setDecliningId(req.id);
+    try {
+      await supabase
+        .from("upi_payment_requests")
+        .update({ status: "declined" })
+        .eq("id", req.id);
+      load();
+    } finally {
+      setDecliningId(null);
+    }
   }
 
   async function handleMarkPaid(req: PaymentRequest, file: File | null) {
@@ -126,6 +148,7 @@ export default function IncomingRequestsPage() {
     <div>
       <NavBar />
       <div className="px-4 py-6 space-y-8">
+        <BackButton />
         <section>
           <h2 className="font-semibold mb-2">Needs your action</h2>
           {loading ? (
@@ -167,6 +190,13 @@ export default function IncomingRequestsPage() {
                       className="flex-1 bg-brand-600 text-white rounded-lg py-3 font-semibold"
                     >
                       Pay now
+                    </button>
+                    <button
+                      onClick={() => handleDecline(req)}
+                      disabled={decliningId === req.id}
+                      className="text-sm text-red-600 border border-red-300 rounded-lg px-4 py-3 font-medium disabled:opacity-50"
+                    >
+                      {decliningId === req.id ? "…" : "Decline"}
                     </button>
                   </div>
 
@@ -219,7 +249,11 @@ export default function IncomingRequestsPage() {
                       {req.requester?.display_name ?? "Someone"} · ₹
                       {req.amount}
                     </p>
-                    <p className="text-xs text-gray-400 capitalize">
+                    <p
+                      className={`text-xs capitalize ${
+                        req.status === "declined" ? "text-red-500" : "text-gray-400"
+                      }`}
+                    >
                       {req.status}
                     </p>
                   </div>

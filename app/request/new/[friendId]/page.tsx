@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import jsQR from "jsqr";
 import { createClient } from "@/lib/supabase/client";
 import { parseUpiString, extractPaymentIdentifierFromText } from "@/lib/upi";
+import BackButton from "@/components/BackButton";
 
 export default function NewRequestPage({
   params,
@@ -148,6 +149,7 @@ export default function NewRequestPage({
 
   return (
     <div className="px-4 py-6">
+      <BackButton />
       <h1 className="text-xl font-bold mb-6">Request a payment</h1>
 
       <form onSubmit={handleSubmit} className="space-y-5">
