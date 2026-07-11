@@ -26,6 +26,7 @@ export default function NewRequestPage({
   const [scanning, setScanning] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [imageExpanded, setImageExpanded] = useState(false);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -176,11 +177,18 @@ export default function NewRequestPage({
           />
           {previewUrl ? (
             <div className="space-y-2">
-              <img
-                src={previewUrl}
-                alt="QR code"
-                className="w-full rounded-lg border border-gray-200"
-              />
+              <button
+                type="button"
+                onClick={() => setImageExpanded(true)}
+                className="block w-32 h-32 rounded-lg overflow-hidden border border-gray-200"
+              >
+                <img
+                  src={previewUrl}
+                  alt="QR code"
+                  className="w-full h-full object-cover"
+                />
+              </button>
+              <p className="text-xs text-gray-400">Tap the photo to view it full-size.</p>
               <div className="flex gap-4">
                 <button
                   type="button"
@@ -269,6 +277,27 @@ export default function NewRequestPage({
           </>
         )}
       </form>
+
+      {imageExpanded && previewUrl && (
+        <div
+          onClick={() => setImageExpanded(false)}
+          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-6"
+        >
+          <img
+            src={previewUrl}
+            alt="QR code full size"
+            className="max-w-full max-h-full rounded-lg"
+          />
+          <button
+            type="button"
+            onClick={() => setImageExpanded(false)}
+            className="absolute top-6 right-6 text-white text-3xl leading-none"
+            aria-label="Close"
+          >
+            ×
+          </button>
+        </div>
+      )}
     </div>
   );
 }
