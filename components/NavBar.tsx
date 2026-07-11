@@ -25,7 +25,7 @@ export default function NavBar() {
   return (
     <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
       <div className="flex items-center justify-between px-4 py-2">
-        <span className="font-semibold text-brand-700">UPI for Mom</span>
+        <span className="font-semibold text-brand-700">UPI for Parents</span>
         <button
           onClick={handleLogout}
           className="text-sm text-gray-500 underline"

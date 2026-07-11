@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "UPI for Mom",
+  title: "UPI for Parents",
   description: "Ask someone you trust to pay a UPI QR code for you.",
 };
 

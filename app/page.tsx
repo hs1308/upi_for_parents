@@ -43,7 +43,7 @@ export default async function HomePage() {
 
       <div className="px-4 py-6">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-xl font-bold">Who do you need to pay?</h1>
+          <h1 className="text-xl font-bold">Select a friend to request them to pay for you</h1>
           {hasFriends && (
             <Link
               href="/friends"

@@ -74,7 +74,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex flex-col justify-center min-h-screen px-6 py-10">
-      <h1 className="text-2xl font-bold text-center mb-1">UPI for Mom</h1>
+      <h1 className="text-2xl font-bold text-center mb-1">UPI for Parents</h1>
       <p className="text-center text-gray-500 mb-8">
         {mode === "login" ? "Log in to continue" : "Create your account"}
       </p>

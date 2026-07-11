@@ -14,6 +14,7 @@ export default function NewRequestPage({
   const router = useRouter();
   const supabase = createClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -162,6 +163,13 @@ export default function NewRequestPage({
             onChange={handleFileChange}
             className="hidden"
           />
+          <input
+            ref={galleryInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="hidden"
+          />
           {previewUrl ? (
             <div className="space-y-2">
               <img
@@ -169,22 +177,40 @@ export default function NewRequestPage({
                 alt="QR code"
                 className="w-full rounded-lg border border-gray-200"
               />
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="text-sm text-brand-700 underline"
+                >
+                  Retake photo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => galleryInputRef.current?.click()}
+                  className="text-sm text-brand-700 underline"
+                >
+                  Choose a different photo
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div>
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="text-sm text-brand-700 underline"
+                className="w-full bg-brand-600 text-white rounded-lg py-4 font-semibold text-lg"
               >
-                Retake photo
+                📷 Open camera
+              </button>
+              <button
+                type="button"
+                onClick={() => galleryInputRef.current?.click()}
+                className="w-full mt-2 text-sm text-brand-700 underline"
+              >
+                or upload a picture instead
               </button>
             </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="w-full bg-brand-600 text-white rounded-lg py-4 font-semibold text-lg"
-            >
-              📷 Open camera
-            </button>
           )}
           {scanning && (
             <p className="text-sm text-brand-700 mt-2 flex items-center gap-2">
