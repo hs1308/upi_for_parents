@@ -150,7 +150,9 @@ export default function NewRequestPage({
   return (
     <div className="px-4 py-6">
       <BackButton />
-      <h1 className="text-xl font-bold mb-6">Request a payment</h1>
+      <h1 className="text-xl font-bold mb-6">
+        {previewUrl ? "Confirm Details & Enter Payment Amount" : "Click a Picture"}
+      </h1>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
@@ -236,18 +238,6 @@ export default function NewRequestPage({
                 onChange={(e) => setUpiId(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-4 py-3"
                 placeholder="e.g. shopkeeper@upi"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Payee name (optional)
-              </label>
-              <input
-                value={payeeName}
-                onChange={(e) => setPayeeName(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-4 py-3"
-                placeholder="e.g. Sharma General Store"
               />
             </div>
 

@@ -5,7 +5,6 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { markSectionSeen } from "@/lib/notifications";
 import NavBar from "@/components/NavBar";
-import BackButton from "@/components/BackButton";
 
 type Profile = {
   id: string;
@@ -134,7 +133,6 @@ export default function FriendsPage() {
     <div>
       <NavBar />
       <div className="px-4 py-6 space-y-8">
-        <BackButton />
         <section>
           <h2 className="font-semibold mb-2">Add a friend</h2>
           <form onSubmit={handleSearch} className="flex gap-2">

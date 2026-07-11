@@ -5,7 +5,6 @@ import { createClient } from "@/lib/supabase/client";
 import { buildUpiPayLink } from "@/lib/upi";
 import { markSectionSeen } from "@/lib/notifications";
 import NavBar from "@/components/NavBar";
-import BackButton from "@/components/BackButton";
 
 type Profile = {
   id: string;
@@ -148,7 +147,6 @@ export default function IncomingRequestsPage() {
     <div>
       <NavBar />
       <div className="px-4 py-6 space-y-8">
-        <BackButton />
         <section>
           <h2 className="font-semibold mb-2">Needs your action</h2>
           {loading ? (

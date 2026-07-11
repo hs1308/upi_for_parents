@@ -5,7 +5,6 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { markSectionSeen } from "@/lib/notifications";
 import NavBar from "@/components/NavBar";
-import BackButton from "@/components/BackButton";
 
 type Profile = {
   id: string;
@@ -78,7 +77,6 @@ export default function SentRequestsPage() {
     <div>
       <NavBar />
       <div className="px-4 py-6 space-y-4">
-        <BackButton />
         <h1 className="text-xl font-bold mb-2">Your requests</h1>
 
         {loading ? (
