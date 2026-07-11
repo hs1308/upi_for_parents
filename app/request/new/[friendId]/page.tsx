@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import jsQR from "jsqr";
 import { createClient } from "@/lib/supabase/client";
-import { parseUpiString } from "@/lib/upi";
+import { parseUpiString, extractPaymentIdentifierFromText } from "@/lib/upi";
 
 export default function NewRequestPage({
   params,
@@ -21,6 +21,7 @@ export default function NewRequestPage({
   const [payeeName, setPayeeName] = useState("");
   const [amount, setAmount] = useState("");
   const [scanNote, setScanNote] = useState<string | null>(null);
+  const [scanning, setScanning] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,19 +31,23 @@ export default function NewRequestPage({
     setPhotoFile(file);
     setPreviewUrl(URL.createObjectURL(file));
     setScanNote(null);
+    setUpiId("");
+    setPayeeName("");
+    setScanning(true);
 
-    // Try to decode a UPI QR code directly from the photo so the person
-    // doesn't have to type the UPI ID by hand.
     try {
+      // 1. Try to decode a UPI QR code directly from the photo.
       const bitmap = await createImageBitmap(file);
       const canvas = document.createElement("canvas");
       canvas.width = bitmap.width;
       canvas.height = bitmap.height;
       const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-      ctx.drawImage(bitmap, 0, 0);
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const code = jsQR(imageData.data, imageData.width, imageData.height);
+      let code = null;
+      if (ctx) {
+        ctx.drawImage(bitmap, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        code = jsQR(imageData.data, imageData.width, imageData.height);
+      }
 
       if (code) {
         const parsed = parseUpiString(code.data);
@@ -50,19 +55,38 @@ export default function NewRequestPage({
           setUpiId(parsed.upiId);
           setPayeeName(parsed.payeeName ?? "");
           if (parsed.amount) setAmount(parsed.amount);
-          setScanNote("QR code scanned — details filled in below.");
-        } else {
-          setScanNote(
-            "Couldn't read a UPI code from that photo. Enter the UPI ID manually below."
-          );
+          setScanNote("✅ QR code scanned — UPI ID filled in below.");
+          setScanning(false);
+          return;
         }
+      }
+
+      // 2. No QR found (or it didn't decode to a UPI link) — fall back to
+      // reading any UPI ID or phone number printed/written in the photo.
+      setScanNote("Reading the photo…");
+      const { createWorker } = await import("tesseract.js");
+      const worker = await createWorker("eng");
+      const {
+        data: { text },
+      } = await worker.recognize(file);
+      await worker.terminate();
+
+      const extracted = extractPaymentIdentifierFromText(text);
+      if (extracted.kind === "upi_id") {
+        setUpiId(extracted.value);
+        setScanNote("✅ UPI ID found in the photo — check it below.");
+      } else if (extracted.kind === "phone") {
+        setUpiId(extracted.value);
+        setScanNote("✅ Phone number found in the photo — check it below.");
       } else {
         setScanNote(
-          "Couldn't find a QR code in that photo. Enter the UPI ID manually below."
+          "Couldn't automatically read a UPI ID from that photo. Please type it in below."
         );
       }
     } catch {
-      setScanNote("Enter the UPI ID manually below.");
+      setScanNote("Please type the UPI ID in below.");
+    } finally {
+      setScanning(false);
     }
   }
 
@@ -128,7 +152,7 @@ export default function NewRequestPage({
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="block text-sm font-medium mb-2">
-            1. Take a photo of the QR code or UPI ID
+            1. Take a photo of the QR code, UPI ID, or phone number
           </label>
           <input
             ref={fileInputRef}
@@ -162,7 +186,13 @@ export default function NewRequestPage({
               📷 Open camera
             </button>
           )}
-          {scanNote && (
+          {scanning && (
+            <p className="text-sm text-brand-700 mt-2 flex items-center gap-2">
+              <span className="inline-block w-3 h-3 border-2 border-brand-600 border-t-transparent rounded-full animate-spin" />
+              Reading the photo…
+            </p>
+          )}
+          {!scanning && scanNote && (
             <p className="text-sm text-gray-500 mt-2">{scanNote}</p>
           )}
         </div>
@@ -171,7 +201,7 @@ export default function NewRequestPage({
           <>
             <div>
               <label className="block text-sm font-medium mb-1">
-                UPI ID
+                UPI ID or phone number
               </label>
               <input
                 value={upiId}
@@ -213,10 +243,10 @@ export default function NewRequestPage({
 
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || scanning}
               className="w-full bg-brand-600 text-white rounded-lg py-4 font-semibold text-lg disabled:opacity-50"
             >
-              {submitting ? "Sending…" : "Send request"}
+              {submitting ? "Sending…" : scanning ? "Reading photo…" : "Send request"}
             </button>
           </>
         )}

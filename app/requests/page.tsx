@@ -147,7 +147,7 @@ export default function IncomingRequestsPage() {
                     <span className="text-lg font-bold">₹{req.amount}</span>
                   </div>
                   <p className="text-sm text-gray-500">
-                    UPI ID: {req.upi_id || "not detected"}
+                    UPI ID / phone: {req.upi_id || "not detected"}
                     {req.payee_name ? ` · ${req.payee_name}` : ""}
                   </p>
                   {req.qr_image_url && (
